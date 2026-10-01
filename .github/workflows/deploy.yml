@@ -1,0 +1,76 @@
+name: Build, Test & Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environnement cible
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.18.0
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: application
+          path: dist/
+
+  test:
+    needs: build
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        node: [20, 22]
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: application
+          path: dist/
+
+      - run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: application
+          path: dist/
+
+      - run: echo "API URL : ${{ vars.API_URL }}"
+
+      - run: |
+          echo "## Déploiement" >> "$GITHUB_STEP_SUMMARY"
+          echo "Cible : ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "URL : ${{ vars.API_URL }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit : \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
