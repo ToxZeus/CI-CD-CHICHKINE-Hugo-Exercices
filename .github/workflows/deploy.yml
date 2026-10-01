@@ -67,7 +67,7 @@ jobs:
           name: application
           path: dist/
 
-      - run: echo "API URL : ${{ vars.API_URL }}"
+      - run: 'echo "API URL : ${{ vars.API_URL }}"'
 
       - run: |
           echo "## Déploiement" >> "$GITHUB_STEP_SUMMARY"
