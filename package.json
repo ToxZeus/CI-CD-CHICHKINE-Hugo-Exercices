@@ -1,0 +1,9 @@
+{
+  "name": "ci-cd-exercices",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Exercices CI/CD",
+  "scripts": {
+    "test": "node --test"
+  }
+}
