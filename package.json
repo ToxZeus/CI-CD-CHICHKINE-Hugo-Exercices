@@ -4,6 +4,7 @@
   "private": true,
   "description": "Exercices CI/CD",
   "scripts": {
+    "build": "node build.js",
     "test": "node --test"
   }
 }
